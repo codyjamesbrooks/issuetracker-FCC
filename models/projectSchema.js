@@ -5,6 +5,9 @@ const issueSchema = new Schema({
   title: { type: String, required: true },
   text: { type: String, required: true },
   createdBy: { type: String, required: true },
+  createdOn: { type: Date, default: Date.now },
+  updatedOn: { type: Date, default: Date.now },
+  open: { type: Boolean, default: true },
   assignedTo: String,
   status: String,
 });
