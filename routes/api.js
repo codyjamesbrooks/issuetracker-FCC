@@ -36,6 +36,22 @@ module.exports = function (app) {
 
     .put(function (req, res) {
       let project = req.params.project;
+
+      const updateObject = Object.keys(req.body).reduce((acc, key) => {
+        const _acc = acc;
+        if (req.body[key] && key !== "_id") _acc[key] = req.body[key];
+        return _acc;
+      }, {});
+      updateObject.updated_on = new Date();
+
+      Project.findOne({ name: project }, (err, projectDoc) => {
+        if (err) return console.error(err);
+        let issue = projectDoc.issues.id(req.body._id);
+        Object.keys(updateObject).forEach(
+          (key) => (issue[key] = updateObject[key])
+        );
+        res.send({ result: "sucessfully updated", _id: issue._id });
+      });
     })
 
     .delete(function (req, res) {
