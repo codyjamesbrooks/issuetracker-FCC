@@ -6,15 +6,30 @@ module.exports = function (app) {
     .route("/api/issues/:project")
     .get(function (req, res) {
       let project = req.params.project;
-      console.log(project);
       Project.findOne({ name: project }, (err, projectDoc) => {
         if (err) return console.error(err);
-        res.send(projectDoc.issues);
+        if (!projectDoc) return res.json([]); // project
+
+        let issues = projectDoc.issues;
+        Object.keys(req.query).forEach((key) => {
+          issues = issues.filter((issue) => issue[key] === req.query[key]);
+        });
+
+        res.json(issues);
       });
     })
 
     .post(function (req, res) {
       let project = req.params.project;
+
+      if (
+        !req.body.issue_title ||
+        !req.body.issue_text ||
+        !req.body.created_by
+      ) {
+        return res.json({ error: "required field(s) missing" });
+      }
+
       let issue = {
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
@@ -29,7 +44,7 @@ module.exports = function (app) {
         (err, updatedProject) => {
           if (err) return console.error(err);
           let newIssue = updatedProject.issues.slice(-1)[0];
-          res.send(newIssue);
+          res.json(newIssue);
         }
       );
     })
@@ -50,11 +65,22 @@ module.exports = function (app) {
         Object.keys(updateObject).forEach(
           (key) => (issue[key] = updateObject[key])
         );
-        res.send({ result: "sucessfully updated", _id: issue._id });
+        res.json({ result: "sucessfully updated", _id: issue._id });
       });
     })
 
     .delete(function (req, res) {
       let project = req.params.project;
+      if (!req.body._id) return res.send({ error: "missing _id" });
+
+      Project.findOneAndUpdate(
+        { name: project },
+        { $pull: { issues: { _id: req.body._id } } },
+        { new: true, useFindAndModify: false },
+        (err, newProject) => {
+          if (err) return console.error(err);
+          res.json({ result: "successfully deleted", _id: req.body._id });
+        }
+      );
     });
 };
