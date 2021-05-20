@@ -8,7 +8,7 @@ module.exports = function (app) {
       let project = req.params.project;
       Project.findOne({ name: project }, (err, projectDoc) => {
         if (err) return console.error(err);
-        if (!projectDoc) return res.json([]); // project
+        if (!projectDoc) return res.json([]); // project doesn't exist. respond with empty array of issues.
 
         let issues = projectDoc.issues;
         Object.keys(req.query).forEach((key) => {
@@ -34,8 +34,8 @@ module.exports = function (app) {
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
         created_by: req.body.created_by,
-        assigned_to: req.body.assigned_to,
-        status_text: req.body.status_text,
+        assigned_to: req.body.assigned_to || "",
+        status_text: req.body.status_text || "",
       };
       Project.findOneAndUpdate(
         { name: project },
