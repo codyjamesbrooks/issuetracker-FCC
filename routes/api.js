@@ -60,7 +60,7 @@ module.exports = function (app) {
         if (issue) {
           let updatedCount = 0;
           for (const [key, value] of Object.entries(req.body)) {
-            if (value !== "" && issue[key] !== value) {
+            if (value !== "" && issue[key] != value) {
               issue[key] = value;
               updatedCount += 1;
             }
@@ -73,7 +73,8 @@ module.exports = function (app) {
             });
           }
 
-          projectDoc.save((err, res) => {
+          issue.updated_on = new Date();
+          projectDoc.save((err) => {
             if (err) return console.error(err);
             return res.json({
               result: "sucessfully updated",

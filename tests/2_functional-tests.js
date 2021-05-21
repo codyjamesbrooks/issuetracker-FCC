@@ -111,15 +111,62 @@ suite("Functional Tests", function () {
     });
   });
   suite("PUT request to /api/issues/{project}", function () {
-    // Update one field on an issue: PUT request to /api/issues/{project}
-    // let updateObject = {
-    //   _id: createdTestIssues[0]._id,
-
-    // }
-    // test("update one field on an issue", function (done) {
-    //   chai.request(server).put("/api/issues/testSuite").send()
-    // })
-    // Update an issue with an invalid _id: PUT request to /api/issues/{project}
+    test("update one field on an issue", function (done) {
+      chai
+        .request(server)
+        .put("/api/issues/testSuite")
+        .send({ _id: createdTestIssues[0]._id, status_text: "updated status" })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.result, "sucessfully updated");
+          assert.equal(res.body._id, createdTestIssues[0]._id);
+          done();
+        });
+    });
+    test("update two fields on an issue", function (done) {
+      chai
+        .request(server)
+        .put("/api/issues/testSuite")
+        .send({
+          _id: createdTestIssues[1]._id,
+          status_text: "closed",
+          issue_text: " Completed",
+        })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.result, "sucessfully updated");
+          assert.equal(res.body._id, createdTestIssues[1]._id);
+          done();
+        });
+    });
+    test("verify that both updates modified the issues sucessfully", function (done) {
+      chai
+        .request(server)
+        .get("/api/issues/testSuite")
+        .end(function (err, res) {
+          assert.equal(res.body.length, 2);
+          assert.include(res.body[0], { status_text: "updated status" });
+          assert.include(res.body[1], { status_text: "closed" });
+          assert.include(res.body[1], { issue_text: " Completed" });
+          assert.notDeepEqual(res.body[0].created_on, res.body[0].updated_on);
+          done();
+        });
+    });
+    test("send update with no fields to update", function (done) {
+      chai
+        .request(server)
+        .put("/api/issues/testSuite")
+        .send({ _id: createdTestIssues[0]._id })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.error, "no update field(s) sent");
+          assert.equal(res.body._id, createdTestIssues[0]._id);
+          done();
+        });
+    });
     test("send put request with invalid _id parameter", function (done) {
       chai
         .request(server)
@@ -212,5 +259,3 @@ suite("Functional Tests", function () {
     });
   });
 });
-// Update multiple fields on an issue: PUT request to /api/issues/{project}
-// Update an issue with no fields to update: PUT request to /api/issues/{project}
