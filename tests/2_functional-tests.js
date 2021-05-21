@@ -119,8 +119,10 @@ suite("Functional Tests", function () {
         .end(function (err, res) {
           assert.equal(res.status, 200);
           assert.equal(res.type, "application/json");
-          assert.equal(res.body.result, "sucessfully updated");
-          assert.equal(res.body._id, createdTestIssues[0]._id);
+          assert.deepEqual(res.body, {
+            result: "successfully updated",
+            _id: createdTestIssues[0]._id,
+          });
           done();
         });
     });
@@ -136,8 +138,10 @@ suite("Functional Tests", function () {
         .end(function (err, res) {
           assert.equal(res.status, 200);
           assert.equal(res.type, "application/json");
-          assert.equal(res.body.result, "sucessfully updated");
-          assert.equal(res.body._id, createdTestIssues[1]._id);
+          assert.deepEqual(res.body, {
+            result: "successfully updated",
+            _id: createdTestIssues[1]._id,
+          });
           done();
         });
     });
@@ -150,7 +154,10 @@ suite("Functional Tests", function () {
           assert.include(res.body[0], { status_text: "updated status" });
           assert.include(res.body[1], { status_text: "closed" });
           assert.include(res.body[1], { issue_text: " Completed" });
-          assert.notDeepEqual(res.body[0].created_on, res.body[0].updated_on);
+          assert.isAbove(
+            Date.parse(res.body[0].updated_on),
+            Date.parse(res.body[0].created_on)
+          );
           done();
         });
     });

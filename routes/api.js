@@ -12,7 +12,7 @@ module.exports = function (app) {
 
         let issues = projectDoc.issues;
         Object.keys(req.query).forEach((key) => {
-          issues = issues.filter((issue) => issue[key] === req.query[key]);
+          issues = issues.filter((issue) => issue[key] == req.query[key]);
         });
 
         res.json(issues);
@@ -71,7 +71,7 @@ module.exports = function (app) {
           projectDoc.save((err) => {
             if (err) return console.error(err);
             return res.json({
-              result: "sucessfully updated",
+              result: "successfully updated",
               _id: req.body._id,
             });
           });
