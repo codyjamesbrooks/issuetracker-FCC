@@ -124,6 +124,19 @@ suite("Functional Tests", function () {
           done();
         });
     });
+    test("send invalid _id with delete request", function (done) {
+      chai
+        .request(server)
+        .delete("/api/issues/testSuite")
+        .send({ _id: createdTestIssues[0]._id })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.error, "could not delete");
+          assert.equal(res.body._id, createdTestIssues[0]._id);
+          done();
+        });
+    });
     test("delete 2nd test issue using valid _id", function (done) {
       chai
         .request(server)
@@ -134,6 +147,18 @@ suite("Functional Tests", function () {
           assert.equal(res.type, "application/json");
           assert.equal(res.body.result, "successfully deleted");
           assert.equal(res.body._id, createdTestIssues[1]._id);
+          done();
+        });
+    });
+    // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+    test("send delete request missing _id parameter", function (done) {
+      chai
+        .request(server)
+        .delete("/api/issues/testSuite")
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.error, "missing _id");
           done();
         });
     });
@@ -151,12 +176,9 @@ suite("Functional Tests", function () {
     });
   });
 });
-
-// View issues on a project with multiple filters: GET request to /api/issues/{project}
 // Update one field on an issue: PUT request to /api/issues/{project}
 // Update multiple fields on an issue: PUT request to /api/issues/{project}
 // Update an issue with missing _id: PUT request to /api/issues/{project}
 // Update an issue with no fields to update: PUT request to /api/issues/{project}
 // Update an issue with an invalid _id: PUT request to /api/issues/{project}
-// Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
 // Delete an issue with missing _id: DELETE request to /api/issues/{project}

@@ -71,15 +71,25 @@ module.exports = function (app) {
 
     .delete(function (req, res) {
       let project = req.params.project;
-      if (!req.body._id) return res.send({ error: "missing _id" });
+      if (!req.body._id) return res.json({ error: "missing _id" });
 
       Project.findOneAndUpdate(
         { name: project },
         { $pull: { issues: { _id: req.body._id } } },
-        { new: true, useFindAndModify: false },
-        (err, newProject) => {
+        { useFindAndModify: false },
+        (err, projectDocBeforePull) => {
           if (err) return console.error(err);
-          res.json({ result: "successfully deleted", _id: req.body._id });
+
+          let deletedIssue = projectDocBeforePull.issues.id(req.body._id);
+
+          if (deletedIssue) {
+            return res.json({
+              result: "successfully deleted",
+              _id: req.body._id,
+            });
+          } else {
+            return res.json({ error: "could not delete", _id: req.body._id });
+          }
         }
       );
     });
