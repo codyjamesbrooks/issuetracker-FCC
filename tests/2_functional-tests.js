@@ -171,7 +171,10 @@ suite("Functional Tests", function () {
       chai
         .request(server)
         .put("/api/issues/testSuite")
-        .send({ _id: "60a6cd6843f83543dc891c52" })
+        .send({
+          _id: "60a6cd6843f83543dc891c52",
+          status_text: "Update Will Fail",
+        })
         .end(function (err, res) {
           assert.equal(res.status, 200);
           assert.equal(res.type, "application/json");
