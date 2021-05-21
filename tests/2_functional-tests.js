@@ -110,6 +110,43 @@ suite("Functional Tests", function () {
         });
     });
   });
+  suite("PUT request to /api/issues/{project}", function () {
+    // Update one field on an issue: PUT request to /api/issues/{project}
+    // let updateObject = {
+    //   _id: createdTestIssues[0]._id,
+
+    // }
+    // test("update one field on an issue", function (done) {
+    //   chai.request(server).put("/api/issues/testSuite").send()
+    // })
+    // Update an issue with an invalid _id: PUT request to /api/issues/{project}
+    test("send put request with invalid _id parameter", function (done) {
+      chai
+        .request(server)
+        .put("/api/issues/testSuite")
+        .send({ _id: "60a6cd6843f83543dc891c52" })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.error, "could not update");
+          assert.equal(res.body._id, "60a6cd6843f83543dc891c52");
+          done();
+        });
+    });
+    const updateObjMissingID = { status_text: "closed" };
+    test("send put request with missing _id parameter", function (done) {
+      chai
+        .request(server)
+        .put("/api/issues/testSuite")
+        .send(updateObjMissingID)
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.error, "missing _id");
+          done();
+        });
+    });
+  });
   suite("DELETE request to /api/issues/{project}", function () {
     test("delete 1st test issue using valid _id", function (done) {
       chai
@@ -120,19 +157,6 @@ suite("Functional Tests", function () {
           assert.equal(res.status, 200);
           assert.equal(res.type, "application/json");
           assert.equal(res.body.result, "successfully deleted");
-          assert.equal(res.body._id, createdTestIssues[0]._id);
-          done();
-        });
-    });
-    test("send invalid _id with delete request", function (done) {
-      chai
-        .request(server)
-        .delete("/api/issues/testSuite")
-        .send({ _id: createdTestIssues[0]._id })
-        .end(function (err, res) {
-          assert.equal(res.status, 200);
-          assert.equal(res.type, "application/json");
-          assert.equal(res.body.error, "could not delete");
           assert.equal(res.body._id, createdTestIssues[0]._id);
           done();
         });
@@ -150,7 +174,19 @@ suite("Functional Tests", function () {
           done();
         });
     });
-    // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+    test("send invalid _id with delete request", function (done) {
+      chai
+        .request(server)
+        .delete("/api/issues/testSuite")
+        .send({ _id: createdTestIssues[0]._id })
+        .end(function (err, res) {
+          assert.equal(res.status, 200);
+          assert.equal(res.type, "application/json");
+          assert.equal(res.body.error, "could not delete");
+          assert.equal(res.body._id, createdTestIssues[0]._id);
+          done();
+        });
+    });
     test("send delete request missing _id parameter", function (done) {
       chai
         .request(server)
@@ -176,9 +212,5 @@ suite("Functional Tests", function () {
     });
   });
 });
-// Update one field on an issue: PUT request to /api/issues/{project}
 // Update multiple fields on an issue: PUT request to /api/issues/{project}
-// Update an issue with missing _id: PUT request to /api/issues/{project}
 // Update an issue with no fields to update: PUT request to /api/issues/{project}
-// Update an issue with an invalid _id: PUT request to /api/issues/{project}
-// Delete an issue with missing _id: DELETE request to /api/issues/{project}

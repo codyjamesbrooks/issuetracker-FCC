@@ -51,21 +51,38 @@ module.exports = function (app) {
 
     .put(function (req, res) {
       let project = req.params.project;
-
-      const updateObject = Object.keys(req.body).reduce((acc, key) => {
-        const _acc = acc;
-        if (req.body[key] && key !== "_id") _acc[key] = req.body[key];
-        return _acc;
-      }, {});
-      updateObject.updated_on = new Date();
+      if (!req.body._id) return res.json({ error: "missing _id" });
 
       Project.findOne({ name: project }, (err, projectDoc) => {
         if (err) return console.error(err);
         let issue = projectDoc.issues.id(req.body._id);
-        Object.keys(updateObject).forEach(
-          (key) => (issue[key] = updateObject[key])
-        );
-        res.json({ result: "sucessfully updated", _id: issue._id });
+
+        if (issue) {
+          let updatedCount = 0;
+          for (const [key, value] of Object.entries(req.body)) {
+            if (value !== "" && issue[key] !== value) {
+              issue[key] = value;
+              updatedCount += 1;
+            }
+          }
+
+          if (updatedCount === 0) {
+            return res.json({
+              error: "no update field(s) sent",
+              _id: req.body._id,
+            });
+          }
+
+          projectDoc.save((err, res) => {
+            if (err) return console.error(err);
+            return res.json({
+              result: "sucessfully updated",
+              _id: req.body._id,
+            });
+          });
+        } else {
+          return res.json({ error: "could not update", _id: req.body._id });
+        }
       });
     })
 
